@@ -53,4 +53,35 @@ contract AgentRelay {
         Task storage t = tasks[id];
         if (t.status != Status.Open) revert InvalidState();
         if (t.creator == msg.sender) revert NotAuthorized();
+        if (t.creator == msg.sender) revert NotAuthorized();
+        t.claimant = msg.sender;
+        t.status = Status.Claimed;
+        emit TaskClaimed(id, msg.sender);
+    }
+    function releaseTask(uint256 id) external onlyAgent {
+        if (id >= tasks.length) revert InvalidTask();
+        Task storage t = tasks[id];
+        if (t.status != Status.Claimed) revert InvalidState();
+        if (t.claimant != msg.sender) revert NotAuthorized();
+        t.claimant = address(0);
+        t.status = Status.Open;
+        emit TaskReleased(id, msg.sender);
+    }
+    function completeTask(uint256 id) external onlyAgent {
+        if (id >= tasks.length) revert InvalidTask();
+        Task storage t = tasks[id];
+        if (t.status != Status.Claimed) revert InvalidState();
+        if (t.creator != msg.sender) revert NotAuthorized();
+        t.status = Status.Completed;
+        emit TaskCompleted(id, msg.sender, t.claimant);
+    }
+    function cancelTask(uint256 id) external onlyAgent {
+        if (id >= tasks.length) revert InvalidTask();
+        Task storage t = tasks[id];
+        if (t.status != Status.Open && t.status != Status.Claimed) revert InvalidState();
+        if (t.creator != msg.sender) revert NotAuthorized();
+        t.status = Status.Cancelled;
+        emit TaskCancelled(id, msg.sender);
+    }
+}
        
