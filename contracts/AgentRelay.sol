@@ -53,7 +53,6 @@ contract AgentRelay {
         Task storage t = tasks[id];
         if (t.status != Status.Open) revert InvalidState();
         if (t.creator == msg.sender) revert NotAuthorized();
-        if (t.creator == msg.sender) revert NotAuthorized();
         t.claimant = msg.sender;
         t.status = Status.Claimed;
         emit TaskClaimed(id, msg.sender);
